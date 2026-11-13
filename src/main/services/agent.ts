@@ -165,6 +165,7 @@ export async function createAgent(config: AgentConfig): Promise<Agent> {
   } catch {
     logger.warn('TTS warm-up failed (first sentence may have a slight delay)')
   }
+  }
 
   const model: Model<'openai-completions'> = {
     id: config.modelName,

@@ -2,7 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import os from 'os'
 
-const CONFIG_DIR = path.join(process.env.HOME || os.homedir(), '.config', 'hi-kid')
+const CONFIG_DIR = 'D:/Rep/hi-kid/.config'
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')
 
 const DEFAULT_SYSTEM_PROMPT = `You are a friendly English conversation partner named {{AI_NAME}}. Your goal is to help the user practice spoken English.
@@ -31,9 +31,9 @@ function getDefaultConfig(): AppConfig {
     version: 1,
     aiName: 'Kitten',
     systemPrompt: DEFAULT_SYSTEM_PROMPT,
-    baseUrl: 'http://localhost:11434/v1',
-    apiKey: 'ollama',
-    modelName: 'qwen3:0.6b'
+    baseUrl: 'https://text.pollinations.ai/openai/v1',
+    apiKey: 'free',
+    modelName: 'openai'
   }
 }
 

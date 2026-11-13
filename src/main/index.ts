@@ -23,6 +23,7 @@ function cleanup(): void {
 }
 
 app.setName('HiKid')
+app.setPath('userData', 'D:/Rep/hi-kid/.config/userData')
 
 function createWindow(): void {
   // Create the browser window.
