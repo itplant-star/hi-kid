@@ -1,3 +1,53 @@
+
+function speakAssistant(text: string): void {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    try {
+      window.speechSynthesis.cancel()
+      const clean = text.replace(/\[Tip:.*?\]/gi, '').replace(/\[Grammar Tip:.*?\]/gi, '')
+      const u = new SpeechSynthesisUtterance(clean)
+      u.lang = 'en-US'
+      u.rate = 0.95
+      window.speechSynthesis.speak(u)
+    } catch {
+      // ignore
+    }
+  }
+}
+
+let activeRecognition: any = null
+
+function startBrowserSpeech(onResult: (text: string) => void): void {
+  if (typeof window === 'undefined') return
+  const SpeechRec = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+  if (!SpeechRec) return
+  try {
+    if (activeRecognition) {
+      activeRecognition.abort()
+    }
+    const rec = new SpeechRec()
+    rec.lang = 'en-IN'
+    rec.interimResults = false
+    rec.onresult = (e: any) => {
+      const text = e.results?.[0]?.[0]?.transcript
+      if (text) onResult(text)
+    }
+    rec.start()
+    activeRecognition = rec
+  } catch (err) {
+    console.warn('Speech recognition error:', err)
+  }
+}
+
+function stopBrowserSpeech(): void {
+  if (activeRecognition) {
+    try {
+      activeRecognition.stop()
+    } catch {
+      // ignore
+    }
+    activeRecognition = null
+  }
+}
 import { useState, useEffect, useCallback } from 'react'
 import { type KittenState, type ChatMessage } from '@renderer/types/conversation'
 
@@ -88,7 +138,15 @@ export function useConversation(): UseConversationReturn {
         }
         return state
       })
-      if (state === 'thinking') {
+      if (state === 'speaking') {
+        setMessages((msgs) => {
+          const last = msgs[msgs.length - 1]
+          if (last && last.role === 'assistant' && last.text) {
+            speakAssistant(last.text)
+          }
+          return msgs
+        })
+      } else if (state === 'thinking') {
         setMessages((prev) => {
           const last = prev[prev.length - 1]
           if (last && last.role === 'assistant' && last.pending) return prev
@@ -191,6 +249,7 @@ export function useConversation(): UseConversationReturn {
   }, [])
 
   const interrupt = useCallback(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel()
     window.api.interrupt().catch((err: unknown) => {
       setError(err instanceof Error ? err.message : String(err))
     })

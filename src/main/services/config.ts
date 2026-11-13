@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import os from 'os'
+// import os from 'os'
 
 const CONFIG_DIR = 'D:/Rep/hi-kid/.config'
 const CONFIG_FILE = path.join(CONFIG_DIR, 'config.json')

@@ -36,7 +36,7 @@ import { createI18n, type I18nFn, type I18nKey } from '../../shared/i18n'
 let t: I18nFn = createI18n('en')
 import fs from 'fs'
 import path from 'path'
-import os from 'os'
+// import os from 'os'
 
 // --- Config ---
 const HI_KID_DIR = 'D:/Rep/hi-kid/.config'
