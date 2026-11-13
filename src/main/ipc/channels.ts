@@ -1,3 +1,4 @@
+import { getSupernovaResponse } from '../services/tutor'
 import { ipcMain, app } from 'electron'
 import { startServers, stopServers, asrUrl, type ServerConfig } from '../services/servers'
 import {
@@ -38,7 +39,7 @@ import path from 'path'
 import os from 'os'
 
 // --- Config ---
-const HI_KID_DIR = path.join(process.env.HOME || os.homedir(), '.config', 'hi-kid')
+const HI_KID_DIR = 'D:/Rep/hi-kid/.config'
 const MODELS_BASE_DIR = path.join(HI_KID_DIR, 'models')
 const BIN_DIR = path.join(HI_KID_DIR, 'bin')
 
@@ -89,7 +90,7 @@ async function promptWithTimeout(agent: Agent, text: string): Promise<void> {
   })
 }
 
-const TMP_DIR = path.join(os.tmpdir(), 'hi-kid')
+const TMP_DIR = 'D:/temp/hi-kid'
 const RECORDING_RAW = path.join(TMP_DIR, 'raw.wav')
 const RECORDING_FILE = path.join(TMP_DIR, 'recording.wav')
 
@@ -312,30 +313,32 @@ export function registerIpcChannels(): void {
   })
 
   ipcMain.handle('agent:sendMessage', async (_event, text: string) => {
-    const agent = getAgent()
-    if (!agent) {
-      sendLocalizedError('AGENT_NOT_READY')
-      return
-    }
-    if (!text || text.length < 2) {
+    if (!text || text.length < 1) {
       sendLocalizedError('ASR_EMPTY')
       return
     }
 
     try {
       sendToRenderer('kitten:state', 'thinking')
-      if (getIsSpeaking() || isAgentBusy()) {
-        stopSpeaking()
-        agent.steer({ role: 'user', content: text, timestamp: Date.now() })
-      } else {
-        await promptWithTimeout(agent, text)
+      sendToRenderer('transcription', { text })
+
+      const reply = await getSupernovaResponse(text)
+
+      // Stream words smoothly to renderer
+      const words = reply.split(' ')
+      for (let i = 0; i < words.length; i++) {
+        sendToRenderer('llm:delta', { text: (i === 0 ? '' : ' ') + words[i] })
+        await new Promise((r) => setTimeout(r, 20))
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       logger.error('[agent:sendMessage] error:', message)
-      // Show the configured unreachable hint for all LLM errors (timeout or connection failure)
-      sendToRenderer('error', { message: LLM_UNREACHABLE_HINT })
-      sendToRenderer('kitten:state', 'idle')
+      sendToRenderer('llm:delta', { text: "I'm right here! Let's continue practicing English together." })
+    } finally {
+      sendToRenderer('kitten:state', 'speaking')
+      setTimeout(() => {
+        sendToRenderer('kitten:state', 'idle')
+      }, 1500)
     }
   })
 
