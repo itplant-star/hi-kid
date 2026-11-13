@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { type ChatMessage } from '@renderer/types/conversation'
 
 interface ChatBubblesProps {
@@ -50,6 +50,12 @@ export default function ChatBubbles({
 }: ChatBubblesProps): React.JSX.Element | null {
   const endRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [inputText, setInputText] = useState('')
+  const handleSend = (): void => {
+    if (!inputText.trim()) return
+    window.api.sendMessage(inputText.trim())
+    setInputText('')
+  }
 
   useEffect(() => {
     if (endRef.current) {
@@ -80,6 +86,23 @@ export default function ChatBubbles({
       )}
 
       <div ref={endRef} />
+      <div style={{ display: 'flex', gap: '8px', padding: '10px 0', marginTop: '12px' }}>
+        <input
+          type="text"
+          placeholder={"Type to " + aiName + "..."}
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleSend() }}
+          style={{ flex: 1, padding: '10px 14px', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.15)', background: '#fff', outline: 'none', fontSize: '14px' }}
+        />
+        <button
+          onClick={handleSend}
+          type="button"
+          style={{ padding: '8px 18px', background: '#e07a5f', color: '#fff', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: 600, fontSize: '14px' }}
+        >
+          Send
+        </button>
+      </div>
     </div>
   )
 }

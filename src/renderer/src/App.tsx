@@ -32,6 +32,7 @@ const ONBOARDED_KEY = 'hikid-onboarded'
 function loadTextEnabled(): boolean {
   try {
     const saved = localStorage.getItem(TEXT_ENABLED_KEY)
+    if (saved === null) return true;
     return saved === 'true'
   } catch {
     return false
