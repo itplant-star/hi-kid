@@ -224,6 +224,9 @@ export function useConversation(): UseConversationReturn {
 
   const startRecording = useCallback(() => {
     setIsRecording(true)
+    startBrowserSpeech((transcript) => {
+      if (transcript) window.api.sendMessage(transcript)
+    })
     window.api
       .startRecording()
       .then((started) => {
@@ -240,6 +243,7 @@ export function useConversation(): UseConversationReturn {
   const stopRecording = useCallback(() => {
     setIsRecording(false)
     setIsProcessing(true)
+    stopBrowserSpeech()
     playSendSound()
     setMessages((prev) => [...prev, { role: 'user', text: '', pending: true }])
     window.api.stopRecording().catch((err: unknown) => {
