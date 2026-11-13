@@ -4,6 +4,7 @@ import { findSoxTool } from './deps'
 let currentPlayProcess: ChildProcess | null = null
 
 export async function playSentence(text: string, baseUrl: string): Promise<void> {
+  if (process.platform === 'win32') return;
   const res = await fetch(`${baseUrl}/v1/audio/speech`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

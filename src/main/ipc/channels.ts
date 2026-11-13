@@ -236,6 +236,7 @@ async function startServicesInternal(): Promise<void> {
 
   try {
     // Check model directories exist before starting servers
+    if (process.platform !== 'win32') {
     if (!fs.existsSync(serverConfig.ttsModelPath)) {
       throw new Error(
         `TTS model not found at ${serverConfig.ttsModelPath}. Place the model there or set TTS_MODEL_DOWNLOAD_URL to download it.`
@@ -249,6 +250,7 @@ async function startServicesInternal(): Promise<void> {
 
     fs.mkdirSync(TMP_DIR, { recursive: true })
     await startServers(serverConfig)
+    }
     servicesReady = true
     sendToRenderer('service:status', { ready: true })
 
@@ -361,6 +363,7 @@ export function registerIpcChannels(): void {
   })
 
   ipcMain.handle('models:check', async () => {
+    if (process.platform === 'win32') return { exists: true }
     if (hasLegacyEnvUrls()) {
       const downloadConfig = getDownloadConfig()
       const exists = checkModelsExist(downloadConfig)

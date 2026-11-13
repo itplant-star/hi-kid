@@ -148,6 +148,7 @@ export async function createAgent(config: AgentConfig): Promise<Agent> {
   const streamSimple = piAi.streamSimple
   const createAssistantMessageEventStream = piAi.createAssistantMessageEventStream
 
+  if (process.platform !== 'win32') {
   // Warm up TTS engine so first real sentence doesn't hit cold-start truncation
   try {
     await fetch(`${localTtsBaseUrl}/v1/audio/speech`, {

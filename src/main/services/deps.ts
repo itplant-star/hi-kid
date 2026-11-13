@@ -64,6 +64,9 @@ export interface SystemDeps {
 }
 
 export async function checkSystemDeps(): Promise<SystemDeps> {
+  if (process.platform === 'win32') {
+    return { sox: true, espeakNg: true, ollama: await checkOllama() }
+  }
   const missingSox = checkSoxTools()
   return {
     sox: missingSox.length === 0,
